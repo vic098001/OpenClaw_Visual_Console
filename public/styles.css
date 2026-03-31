@@ -1,0 +1,1545 @@
+@import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@500;700;800&display=swap");
+
+:root {
+  --bg-0: #02050d;
+  --bg-1: #061123;
+  --bg-2: #0b203a;
+  --panel: rgba(7, 17, 33, 0.86);
+  --panel-soft: rgba(7, 19, 37, 0.68);
+  --line: rgba(111, 227, 255, 0.28);
+  --line-strong: rgba(111, 227, 255, 0.52);
+  --text: #e5f8ff;
+  --text-soft: #89a7bf;
+  --cyan: #5de4ff;
+  --blue: #7ca8ff;
+  --green: #8aff9c;
+  --amber: #ffc26d;
+  --red: #ff6d89;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Share Tech Mono", "Consolas", monospace;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 10% -10%, rgba(82, 163, 255, 0.34), transparent 34%),
+    radial-gradient(circle at 92% 6%, rgba(65, 141, 197, 0.3), transparent 30%),
+    radial-gradient(circle at 52% 115%, rgba(255, 165, 87, 0.2), transparent 38%),
+    linear-gradient(165deg, var(--bg-0) 0%, var(--bg-1) 38%, var(--bg-0) 100%);
+  overflow-x: hidden;
+}
+
+.city-layer,
+.glow-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.city-layer {
+  z-index: 0;
+  opacity: 0.38;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent 58%),
+    repeating-linear-gradient(
+      to right,
+      rgba(130, 198, 255, 0.18) 0 2px,
+      transparent 2px 30px
+    );
+  clip-path: polygon(0 100%, 0 72%, 4% 62%, 10% 71%, 15% 55%, 19% 74%, 24% 59%, 28% 79%, 35% 52%, 41% 72%, 47% 58%, 53% 76%, 59% 60%, 64% 72%, 68% 49%, 72% 70%, 77% 56%, 81% 76%, 87% 64%, 91% 70%, 95% 56%, 100% 74%, 100% 100%);
+}
+
+.glow-layer {
+  z-index: 1;
+}
+
+.glow-layer::before,
+.glow-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.glow-layer::before {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(123, 214, 255, 0.022) 0 1px,
+      transparent 1px 5px
+    ),
+    linear-gradient(120deg, rgba(80, 224, 255, 0.08), transparent 38%);
+  animation: sweep 15s linear infinite;
+}
+
+.glow-layer::after {
+  background: radial-gradient(circle at 50% -20%, rgba(117, 179, 255, 0.2), transparent 58%);
+}
+
+.ops-shell {
+  position: relative;
+  z-index: 2;
+  width: min(1450px, calc(100vw - 2.2rem));
+  margin: 1.2rem auto 2.1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.panel {
+  position: relative;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  backdrop-filter: blur(8px);
+  padding: 1rem 1.05rem;
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+  box-shadow:
+    inset 0 0 0 1px rgba(109, 225, 255, 0.08),
+    0 0 30px rgba(45, 119, 188, 0.2);
+}
+
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(111, 227, 255, 0.08);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  pointer-events: none;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--cyan);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+}
+
+.topbar h1 {
+  margin: 0.34rem 0 0;
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  font-size: clamp(1.15rem, 2.4vw, 2.16rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.topbar-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.source-control {
+  display: grid;
+  gap: 0.16rem;
+  color: var(--text-soft);
+  font-size: 0.58rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.source-picker {
+  min-width: 180px;
+  font-family: "Share Tech Mono", "Consolas", monospace;
+  color: var(--text);
+  border: 1px solid rgba(124, 168, 255, 0.46);
+  background: linear-gradient(140deg, rgba(9, 24, 42, 0.92), rgba(5, 13, 25, 0.94));
+  padding: 0.34rem 0.46rem;
+}
+
+.source-picker:disabled {
+  opacity: 0.62;
+}
+
+.muted {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.neon-btn {
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  font-size: 0.67rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(135deg, rgba(12, 34, 62, 0.95), rgba(6, 20, 39, 0.94));
+  padding: 0.52rem 0.88rem;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.neon-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(93, 228, 255, 0.3);
+}
+
+.neon-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.ghost-btn {
+  background: rgba(9, 26, 45, 0.74);
+  border-color: rgba(124, 168, 255, 0.44);
+}
+
+.command-ribbon {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.72rem;
+  background:
+    linear-gradient(150deg, rgba(8, 23, 42, 0.94), rgba(5, 14, 27, 0.92)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(96, 228, 255, 0.05) 0 1px,
+      transparent 1px 32px
+    );
+}
+
+.ribbon-cell {
+  border: 1px solid rgba(111, 227, 255, 0.21);
+  background: linear-gradient(150deg, rgba(7, 24, 44, 0.82), rgba(4, 12, 24, 0.86));
+  padding: 0.5rem 0.62rem;
+  display: grid;
+  gap: 0.14rem;
+}
+
+.ribbon-cell span {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.ribbon-cell strong {
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  font-size: 0.98rem;
+  letter-spacing: 0.06em;
+  color: var(--cyan);
+}
+
+.mission-hub {
+  display: grid;
+  grid-template-columns: 1.14fr 1.14fr 1fr 0.92fr;
+  gap: 0.88rem;
+  align-items: stretch;
+}
+
+.mission-card {
+  background:
+    linear-gradient(145deg, rgba(7, 20, 38, 0.9), rgba(3, 10, 23, 0.94)),
+    radial-gradient(circle at 9% 10%, rgba(93, 228, 255, 0.1), transparent 44%);
+  min-height: 176px;
+  overflow: hidden;
+}
+
+.mission-timeline-card {
+  grid-column: 1 / 3;
+}
+
+.mission-network-card {
+  grid-column: 3 / 4;
+  grid-row: 1 / 3;
+  min-height: 364px;
+}
+
+.mission-action-card {
+  grid-column: 4 / 5;
+  grid-row: 1 / 3;
+  min-height: 364px;
+}
+
+.mission-alert-card {
+  grid-column: 1 / 2;
+}
+
+.mission-token-card {
+  grid-column: 2 / 3;
+}
+
+.mission-timeline {
+  margin-top: 0.72rem;
+  display: grid;
+  gap: 0.56rem;
+}
+
+.timeline-item {
+  border: 1px solid rgba(103, 213, 255, 0.18);
+  background: linear-gradient(135deg, rgba(8, 24, 45, 0.7), rgba(6, 13, 26, 0.82));
+  padding: 0.5rem 0.54rem;
+}
+
+.timeline-item.tone-critical {
+  border-color: rgba(255, 194, 109, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(255, 194, 109, 0.12);
+}
+
+.timeline-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.42rem;
+}
+
+.timeline-kind {
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  color: var(--cyan);
+  font-size: 0.61rem;
+  letter-spacing: 0.08em;
+}
+
+.timeline-eta {
+  color: var(--text-soft);
+  font-size: 0.61rem;
+}
+
+.timeline-title {
+  margin: 0.2rem 0 0;
+  color: #d8f5ff;
+  font-size: 0.7rem;
+  line-height: 1.32;
+}
+
+.timeline-detail {
+  margin: 0.18rem 0 0;
+  color: var(--text-soft);
+  font-size: 0.61rem;
+}
+
+.timeline-track {
+  margin-top: 0.38rem;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.timeline-track span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #48f9ef, #7ca8ff);
+}
+
+.network-map {
+  margin-top: 0.72rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.network-stage {
+  position: relative;
+  min-height: 274px;
+  border: 1px solid rgba(124, 168, 255, 0.24);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(64, 139, 219, 0.18), transparent 54%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(93, 228, 255, 0.04) 0 1px,
+      transparent 1px 20px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(93, 228, 255, 0.04) 0 1px,
+      transparent 1px 20px
+    ),
+    linear-gradient(170deg, rgba(6, 16, 31, 0.96), rgba(3, 8, 18, 0.95));
+  overflow: hidden;
+}
+
+.network-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.network-svg line {
+  stroke: rgba(103, 221, 255, 0.88);
+}
+
+.network-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.network-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid rgba(93, 228, 255, 0.42);
+  background: rgba(8, 24, 42, 0.88);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.network-node:hover {
+  transform: translate(-50%, -50%) scale(1.06);
+  box-shadow: 0 0 18px rgba(93, 228, 255, 0.36);
+}
+
+.network-node span {
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+
+.network-node small {
+  font-size: 0.54rem;
+  color: var(--text-soft);
+}
+
+.network-node.is-hot {
+  box-shadow:
+    0 0 0 2px rgba(255, 194, 109, 0.46),
+    0 0 16px rgba(255, 194, 109, 0.4);
+}
+
+.network-foot {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.alert-console {
+  margin-top: 0.72rem;
+  display: grid;
+  gap: 0.52rem;
+}
+
+.alert-item {
+  border: 1px solid rgba(111, 227, 255, 0.2);
+  background: linear-gradient(140deg, rgba(8, 23, 42, 0.78), rgba(4, 11, 23, 0.9));
+  padding: 0.46rem 0.5rem;
+}
+
+.alert-item.level-error {
+  border-color: rgba(255, 109, 137, 0.44);
+  box-shadow: inset 0 0 0 1px rgba(255, 109, 137, 0.12);
+}
+
+.alert-item.level-warn {
+  border-color: rgba(255, 194, 109, 0.36);
+  box-shadow: inset 0 0 0 1px rgba(255, 194, 109, 0.1);
+}
+
+.alert-item.level-ok {
+  border-color: rgba(138, 255, 156, 0.36);
+}
+
+.alert-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.alert-level,
+.alert-time {
+  font-size: 0.58rem;
+  letter-spacing: 0.07em;
+  color: var(--text-soft);
+}
+
+.alert-title {
+  margin: 0.2rem 0 0;
+  color: #e0f7ff;
+  font-size: 0.69rem;
+}
+
+.alert-detail {
+  margin: 0.14rem 0 0;
+  color: var(--text-soft);
+  font-size: 0.61rem;
+  line-height: 1.3;
+}
+
+.token-heat {
+  margin-top: 0.72rem;
+  display: grid;
+  gap: 0.48rem;
+}
+
+.heat-overview {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  color: var(--text-soft);
+  font-size: 0.63rem;
+}
+
+.heat-overview p {
+  margin: 0;
+}
+
+.heat-overview strong {
+  color: var(--cyan);
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  font-size: 0.76rem;
+}
+
+.heat-rows {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.heat-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 50px;
+  gap: 0.44rem;
+  align-items: center;
+}
+
+.heat-agent {
+  color: #daf5ff;
+  font-size: 0.63rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.heat-bar {
+  height: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.heat-bar span {
+  display: block;
+  height: 100%;
+}
+
+.heat-row.level-high .heat-bar span {
+  background: linear-gradient(90deg, #ff7b93, #ffc26d);
+}
+
+.heat-row.level-mid .heat-bar span {
+  background: linear-gradient(90deg, #5de4ff, #7ca8ff);
+}
+
+.heat-row.level-low .heat-bar span {
+  background: linear-gradient(90deg, #7de2a5, #5de4ff);
+}
+
+.heat-value {
+  color: var(--text-soft);
+  font-size: 0.62rem;
+  text-align: right;
+}
+
+.action-deck {
+  margin-top: 0.72rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.action-deck .neon-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.action-deck-status {
+  margin-top: 0.62rem;
+  border: 1px solid rgba(124, 168, 255, 0.24);
+  background: rgba(7, 19, 37, 0.72);
+  padding: 0.5rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.action-deck-status p {
+  margin: 0;
+  font-size: 0.62rem;
+  color: var(--text-soft);
+}
+
+.action-deck-status .status-info {
+  color: var(--cyan);
+}
+
+.action-deck-status .status-warn {
+  color: var(--amber);
+}
+
+.action-deck-status .status-err {
+  color: var(--red);
+}
+
+.tactical-stage {
+  background:
+    radial-gradient(circle at 50% -20%, rgba(93, 228, 255, 0.14), transparent 44%),
+    radial-gradient(circle at 88% 130%, rgba(255, 194, 109, 0.13), transparent 38%),
+    linear-gradient(155deg, rgba(6, 16, 31, 0.95), rgba(4, 10, 21, 0.96));
+}
+
+.tactical-grid {
+  margin-top: 0.76rem;
+  display: grid;
+  grid-template-columns: 1.22fr 1fr 0.92fr;
+  gap: 0.82rem;
+}
+
+.stage-card {
+  border: 1px solid rgba(111, 227, 255, 0.2);
+  background: linear-gradient(145deg, rgba(7, 21, 39, 0.84), rgba(4, 10, 22, 0.9));
+  padding: 0.62rem;
+  min-height: 250px;
+  overflow: hidden;
+}
+
+.stage-card h3 {
+  margin: 0;
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.74rem;
+  color: var(--cyan);
+}
+
+.stage-radar {
+  margin-top: 0.62rem;
+}
+
+.stage-radar-board {
+  position: relative;
+  min-height: 280px;
+  border: 1px solid rgba(111, 227, 255, 0.25);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(93, 228, 255, 0.16), transparent 50%),
+    linear-gradient(170deg, rgba(5, 14, 26, 0.96), rgba(2, 7, 15, 0.98));
+  overflow: hidden;
+}
+
+.stage-radar-board::before,
+.stage-radar-board::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.stage-radar-board::before {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(93, 228, 255, 0.04) 0 1px,
+      transparent 1px 22px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(93, 228, 255, 0.04) 0 1px,
+      transparent 1px 22px
+    );
+}
+
+.stage-radar-board::after {
+  background: radial-gradient(circle at 50% 50%, transparent 0 38%, rgba(93, 228, 255, 0.06) 40%, transparent 41%);
+}
+
+.radar-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(93, 228, 255, 0.32);
+  border-radius: 50%;
+}
+
+.ring-a {
+  width: 34%;
+  height: 34%;
+}
+
+.ring-b {
+  width: 58%;
+  height: 58%;
+}
+
+.ring-c {
+  width: 82%;
+  height: 82%;
+}
+
+.radar-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 106px;
+  height: 106px;
+  border-radius: 50%;
+  border: 1px solid rgba(111, 227, 255, 0.55);
+  background: radial-gradient(circle, rgba(17, 62, 89, 0.8), rgba(6, 14, 27, 0.96));
+  display: grid;
+  place-items: center;
+  text-align: center;
+  box-shadow: 0 0 22px rgba(93, 228, 255, 0.24);
+}
+
+.radar-core p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+}
+
+.radar-core strong {
+  margin-top: 0.16rem;
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  color: var(--cyan);
+  font-size: 0.9rem;
+}
+
+.radar-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(9, 31, 53, 0.92);
+  color: #e9fbff;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.radar-dot:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.radar-dot span {
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  font-size: 0.53rem;
+  letter-spacing: 0.04em;
+}
+
+.radar-dot.is-focused {
+  box-shadow:
+    0 0 0 2px rgba(255, 194, 109, 0.5),
+    0 0 14px rgba(255, 194, 109, 0.36);
+}
+
+.stage-line-wrap {
+  margin-top: 0.58rem;
+  border: 1px solid rgba(111, 227, 255, 0.24);
+  background: linear-gradient(180deg, rgba(8, 22, 40, 0.9), rgba(4, 11, 21, 0.95));
+  min-height: 126px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stage-line-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 0 36%,
+    rgba(93, 228, 255, 0.14) 50%,
+    transparent 62% 100%
+  );
+  transform: translateX(-88%);
+  animation: holoSweep 4.6s linear infinite;
+  pointer-events: none;
+}
+
+.stage-line-canvas {
+  width: 100%;
+  height: 126px;
+  display: block;
+}
+
+.stage-task-matrix {
+  margin-top: 0.58rem;
+  display: grid;
+  gap: 0.44rem;
+}
+
+.task-lane {
+  border: 1px solid rgba(111, 227, 255, 0.2);
+  background: rgba(6, 17, 31, 0.82);
+  padding: 0.42rem 0.46rem;
+}
+
+.task-lane-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.lane-id {
+  color: #ddf5ff;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lane-age {
+  color: var(--text-soft);
+  font-size: 0.6rem;
+}
+
+.lane-text {
+  margin: 0.18rem 0 0;
+  color: #d8f0ff;
+  font-size: 0.67rem;
+}
+
+.lane-kind {
+  margin: 0.16rem 0 0;
+  color: var(--text-soft);
+  font-size: 0.57rem;
+  letter-spacing: 0.07em;
+}
+
+.stage-wave-wrap {
+  margin-top: 0.58rem;
+  border: 1px solid rgba(111, 227, 255, 0.24);
+  background: linear-gradient(180deg, rgba(6, 18, 34, 0.94), rgba(3, 8, 16, 0.98));
+  min-height: 176px;
+}
+
+.stage-wave-canvas {
+  width: 100%;
+  height: 176px;
+  display: block;
+}
+
+.stage-pulse {
+  margin-top: 0.58rem;
+  display: grid;
+  gap: 0.52rem;
+}
+
+.pulse-chips {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.36rem;
+}
+
+.pulse-chip {
+  margin: 0;
+  border: 1px solid rgba(124, 168, 255, 0.25);
+  background: rgba(8, 21, 39, 0.8);
+  padding: 0.34rem 0.38rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-soft);
+  font-size: 0.6rem;
+}
+
+.pulse-chip strong {
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  color: var(--cyan);
+  font-size: 0.72rem;
+}
+
+.pulse-meta {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.6rem;
+  line-height: 1.35;
+}
+
+.cockpit-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.44fr) minmax(370px, 0.56fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.cockpit-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.panel-head h2 {
+  margin: 0;
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.95rem;
+}
+
+.office-panel {
+  background:
+    radial-gradient(circle at 8% 10%, rgba(93, 228, 255, 0.13), transparent 34%),
+    radial-gradient(circle at 92% 110%, rgba(255, 194, 109, 0.16), transparent 32%),
+    linear-gradient(152deg, rgba(6, 16, 31, 0.95), rgba(3, 10, 21, 0.95));
+}
+
+.office-head-tools {
+  display: flex;
+  gap: 0.72rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.sim-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  border: 1px solid rgba(124, 168, 255, 0.32);
+  background: rgba(7, 21, 38, 0.7);
+  padding: 0.32rem 0.48rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.67rem;
+}
+
+.sim-switch input {
+  accent-color: var(--cyan);
+}
+
+.office-grid {
+  margin-top: 0.86rem;
+  display: grid;
+  grid-template-columns: 1.42fr 0.58fr;
+  gap: 0.9rem;
+}
+
+.office-map-wrap {
+  border: 1px solid rgba(111, 227, 255, 0.22);
+  background: linear-gradient(150deg, rgba(7, 22, 40, 0.86), rgba(4, 12, 24, 0.92));
+  padding: 0.58rem;
+}
+
+.office-viewport {
+  position: relative;
+  min-height: 470px;
+  border: 1px solid rgba(124, 168, 255, 0.28);
+  background:
+    radial-gradient(circle at 50% -22%, rgba(93, 228, 255, 0.2), rgba(4, 11, 20, 0.95) 52%),
+    linear-gradient(180deg, rgba(4, 10, 18, 0.96), rgba(3, 8, 15, 0.96));
+  overflow: hidden;
+}
+
+.office-viewport canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.office-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+}
+
+.office-viewport.is-ready .office-loading {
+  display: none;
+}
+
+.office-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: auto;
+  padding: 0.72rem;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.66), rgba(5, 15, 29, 0.42)),
+    repeating-linear-gradient(
+      to right,
+      rgba(72, 249, 239, 0.03) 0 1px,
+      transparent 1px 27px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(72, 249, 239, 0.02) 0 1px,
+      transparent 1px 23px
+    );
+}
+
+.fallback-item {
+  border: 1px solid rgba(93, 228, 255, 0.2);
+  background: rgba(7, 19, 35, 0.78);
+  padding: 0.48rem;
+  margin-bottom: 0.46rem;
+}
+
+.fallback-item:last-child {
+  margin-bottom: 0;
+}
+
+.fallback-title {
+  margin: 0;
+  color: #dff4ff;
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.fallback-meta {
+  margin: 0.22rem 0 0;
+  color: var(--text-soft);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.office-legend {
+  margin-top: 0.56rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.86rem;
+}
+
+.office-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  color: var(--text-soft);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.46);
+}
+
+.legend-dot.state-running {
+  background: var(--green);
+}
+
+.legend-dot.state-active {
+  background: var(--cyan);
+}
+
+.legend-dot.state-idle {
+  background: var(--amber);
+}
+
+.legend-dot.state-offline {
+  background: var(--red);
+}
+
+.office-status {
+  margin-top: 0.42rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+}
+
+.office-feed-wrap {
+  border: 1px solid rgba(111, 227, 255, 0.2);
+  background: linear-gradient(150deg, rgba(8, 22, 39, 0.82), rgba(4, 10, 22, 0.9));
+  padding: 0.72rem;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 0.46rem;
+}
+
+.office-feed-wrap h3 {
+  margin: 0;
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.79rem;
+  color: var(--cyan);
+}
+
+.office-feed {
+  display: grid;
+  gap: 0.46rem;
+  max-height: 470px;
+  overflow-y: auto;
+  padding-right: 0.15rem;
+}
+
+.feed-item {
+  border: 1px solid rgba(111, 227, 255, 0.16);
+  background: rgba(6, 17, 31, 0.76);
+  padding: 0.42rem 0.48rem;
+}
+
+.feed-item p {
+  margin: 0;
+}
+
+.feed-title {
+  color: #d8f3ff;
+  font-size: 0.71rem;
+  line-height: 1.34;
+}
+
+.feed-meta {
+  color: var(--text-soft);
+  margin-top: 0.2rem;
+  font-size: 0.61rem;
+  line-height: 1.3;
+}
+
+.metrics-panel .panel-head {
+  margin-bottom: 0.68rem;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.62rem;
+}
+
+.metric {
+  min-height: 86px;
+  border: 1px solid rgba(111, 227, 255, 0.19);
+  background: linear-gradient(150deg, rgba(8, 25, 45, 0.76), rgba(4, 12, 24, 0.86));
+  padding: 0.56rem;
+  display: grid;
+  align-content: space-between;
+}
+
+.metric .label {
+  font-size: 0.66rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metric .value {
+  margin-top: 0.2rem;
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  font-size: 1.28rem;
+  letter-spacing: 0.04em;
+  color: var(--cyan);
+  line-height: 1;
+}
+
+.metric .hint {
+  margin-top: 0.18rem;
+  color: var(--text-soft);
+  font-size: 0.62rem;
+}
+
+.agent-grid {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.62rem;
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 0.14rem;
+}
+
+.agent-card {
+  border: 1px solid rgba(111, 227, 255, 0.17);
+  background: linear-gradient(160deg, rgba(8, 24, 44, 0.84), rgba(5, 12, 24, 0.9));
+  padding: 0.62rem;
+  display: grid;
+  gap: 0.44rem;
+}
+
+.agent-card.is-focused {
+  border-color: rgba(255, 194, 109, 0.62);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 194, 109, 0.2),
+    0 0 22px rgba(255, 194, 109, 0.16);
+}
+
+.agent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.agent-name {
+  margin: 0;
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.state-chip {
+  font-size: 0.62rem;
+  border: 1px solid;
+  padding: 0.1rem 0.36rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.state-running {
+  color: var(--green);
+  border-color: rgba(138, 255, 156, 0.42);
+  background: rgba(44, 119, 63, 0.26);
+}
+
+.state-active {
+  color: var(--cyan);
+  border-color: rgba(93, 228, 255, 0.42);
+  background: rgba(30, 101, 115, 0.24);
+}
+
+.state-idle {
+  color: var(--amber);
+  border-color: rgba(255, 194, 109, 0.34);
+  background: rgba(97, 66, 22, 0.28);
+}
+
+.state-offline {
+  color: var(--red);
+  border-color: rgba(255, 109, 137, 0.38);
+  background: rgba(95, 21, 38, 0.26);
+}
+
+.agent-work {
+  margin: 0;
+  color: #d9f2ff;
+  font-size: 0.75rem;
+  line-height: 1.36;
+}
+
+.agent-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  color: var(--text-soft);
+  font-size: 0.63rem;
+}
+
+.usage-wrap {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.usage-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-soft);
+  font-size: 0.62rem;
+}
+
+.usage-bar {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.usage-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #50f0c7, #5ab7ff);
+}
+
+.activity-list {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.56rem;
+  max-height: 300px;
+  overflow: auto;
+  padding-right: 0.12rem;
+}
+
+.activity-item {
+  border: 1px solid rgba(124, 168, 255, 0.2);
+  background: linear-gradient(135deg, rgba(10, 26, 44, 0.76), rgba(4, 12, 24, 0.86));
+  padding: 0.54rem;
+}
+
+.activity-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.activity-title {
+  margin: 0;
+  color: var(--cyan);
+  font-size: 0.7rem;
+}
+
+.activity-time {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.61rem;
+}
+
+.activity-body {
+  margin: 0.26rem 0 0;
+  color: #d6edff;
+  font-size: 0.67rem;
+  line-height: 1.34;
+}
+
+.cron-table {
+  margin-top: 0.74rem;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+th,
+td {
+  border-bottom: 1px solid rgba(111, 227, 255, 0.15);
+  padding: 0.5rem 0.32rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  font-family: "Orbitron", "Share Tech Mono", monospace;
+  color: var(--text-soft);
+  font-size: 0.61rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.footer-bar {
+  padding: 0.68rem 0.9rem;
+}
+
+.footer-bar p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.7rem;
+}
+
+.empty {
+  color: var(--text-soft);
+  padding: 0.8rem 0;
+}
+
+@keyframes sweep {
+  0% {
+    transform: translateY(-2%);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translateY(1.8%);
+    opacity: 0.44;
+  }
+  100% {
+    transform: translateY(-2%);
+    opacity: 0.25;
+  }
+}
+
+@keyframes holoSweep {
+  0% {
+    transform: translateX(-88%);
+    opacity: 0.2;
+  }
+  45% {
+    opacity: 0.46;
+  }
+  100% {
+    transform: translateX(92%);
+    opacity: 0.18;
+  }
+}
+
+@media (max-width: 1320px) {
+  .tactical-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stage-radar-card {
+    grid-column: 1 / 3;
+  }
+
+  .mission-hub {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mission-timeline-card,
+  .mission-network-card,
+  .mission-action-card,
+  .mission-alert-card,
+  .mission-token-card {
+    grid-column: auto;
+    grid-row: auto;
+    min-height: 0;
+  }
+
+  .mission-network-card,
+  .mission-action-card {
+    min-height: 320px;
+  }
+
+  .cockpit-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .office-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .office-feed {
+    max-height: 210px;
+  }
+
+  .agent-grid,
+  .activity-list {
+    max-height: 280px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .tactical-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stage-radar-card {
+    grid-column: auto;
+  }
+
+  .stage-card {
+    min-height: 0;
+  }
+
+  .stage-radar-board {
+    min-height: 232px;
+  }
+
+  .stage-line-canvas {
+    height: 112px;
+  }
+
+  .stage-wave-canvas {
+    height: 156px;
+  }
+
+  .mission-hub {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-network-card,
+  .mission-action-card {
+    min-height: 0;
+  }
+
+  .network-stage {
+    min-height: 238px;
+  }
+
+  .command-ribbon {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .ops-shell {
+    width: min(1450px, calc(100vw - 1rem));
+    margin-top: 0.7rem;
+    gap: 0.72rem;
+  }
+
+  .panel {
+    padding: 0.74rem 0.76rem;
+  }
+
+  .topbar {
+    align-items: flex-start;
+  }
+
+  .source-control {
+    width: 100%;
+  }
+
+  .source-picker {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .command-ribbon {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .heat-row {
+    grid-template-columns: 70px minmax(0, 1fr) 42px;
+  }
+
+  .network-node {
+    width: 46px;
+    height: 46px;
+  }
+
+  .stage-wave-canvas {
+    height: 142px;
+  }
+
+  .radar-core {
+    width: 90px;
+    height: 90px;
+  }
+
+  .office-viewport {
+    min-height: 300px;
+  }
+
+  .office-head-tools {
+    gap: 0.4rem;
+  }
+
+  .office-head-tools .muted {
+    width: 100%;
+  }
+
+  .agent-grid,
+  .activity-list {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+}

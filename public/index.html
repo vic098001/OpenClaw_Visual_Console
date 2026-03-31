@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VIC's OpenClaw Agents 可视化控制中心</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="city-layer"></div>
+    <div class="glow-layer"></div>
+
+    <main class="ops-shell">
+      <header class="panel topbar">
+        <div>
+          <p class="eyebrow">SKYLINE PENTHOUSE OPS DECK · 200m²</p>
+          <h1>VIC's OpenClaw Agents 可视化控制中心</h1>
+        </div>
+        <div class="topbar-tools">
+          <label class="source-control" for="sourcePicker">
+            <span>监控源</span>
+            <select id="sourcePicker" class="source-picker">
+              <option value="local">local</option>
+            </select>
+          </label>
+          <p id="lastUpdated" class="muted">等待首次数据...</p>
+          <button id="refreshBtn" class="neon-btn">立即刷新</button>
+        </div>
+      </header>
+
+      <section class="panel command-ribbon">
+        <div class="ribbon-cell">
+          <span>本地时间</span>
+          <strong id="localClock">--:--:--</strong>
+        </div>
+        <div class="ribbon-cell">
+          <span>3D 引擎模式</span>
+          <strong id="engineMode">BOOTING</strong>
+        </div>
+        <div class="ribbon-cell">
+          <span>Agent 热度</span>
+          <strong id="agentHeat">0/0</strong>
+        </div>
+        <div class="ribbon-cell">
+          <span>系统告警</span>
+          <strong id="alertCount">0</strong>
+        </div>
+      </section>
+
+      <section class="mission-hub">
+        <article class="panel mission-card mission-timeline-card">
+          <div class="panel-head">
+            <h2>Mission Timeline</h2>
+            <p class="muted">未来 60 分钟任务轨道</p>
+          </div>
+          <div id="missionTimeline" class="mission-timeline"></div>
+        </article>
+
+        <article class="panel mission-card mission-network-card">
+          <div class="panel-head">
+            <h2>协同网络图</h2>
+            <p class="muted">Agent 关系与消息流</p>
+          </div>
+          <div id="collabNetwork" class="network-map"></div>
+        </article>
+
+        <article class="panel mission-card mission-alert-card">
+          <div class="panel-head">
+            <h2>异常控制台</h2>
+            <p class="muted">错误与降级链路</p>
+          </div>
+          <div id="alertConsole" class="alert-console"></div>
+        </article>
+
+        <article class="panel mission-card mission-token-card">
+          <div class="panel-head">
+            <h2>Token 热力带</h2>
+            <p class="muted">上下文压力感知</p>
+          </div>
+          <div id="tokenHeat" class="token-heat"></div>
+        </article>
+
+        <article class="panel mission-card mission-action-card">
+          <div class="panel-head">
+            <h2>Action Deck</h2>
+            <p class="muted">快捷战术动作</p>
+          </div>
+          <div class="action-deck">
+            <button id="actionForceRefresh" class="neon-btn">强制刷新</button>
+            <button id="actionFocusHotAgent" class="neon-btn">锁定热点 Agent</button>
+            <button id="actionToggleCruise" class="neon-btn ghost-btn">切换巡航</button>
+            <button id="actionToggleMotion" class="neon-btn ghost-btn">切换动画</button>
+            <button id="actionSnapshot" class="neon-btn ghost-btn">复制快照</button>
+          </div>
+          <div id="actionDeckStatus" class="action-deck-status">
+            <p class="muted">等待实时数据...</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel tactical-stage">
+        <div class="panel-head">
+          <h2>Tactical Holo Stage</h2>
+          <p class="muted">中区全息战术台：雷达追踪 + 任务火线 + 吞吐脉冲</p>
+        </div>
+        <div class="tactical-grid">
+          <article class="stage-card stage-radar-card">
+            <h3>Agent Holo Radar</h3>
+            <div id="stageRadar" class="stage-radar"></div>
+          </article>
+          <article class="stage-card stage-task-card">
+            <h3>Task Fireline</h3>
+            <div class="stage-line-wrap">
+              <canvas id="stageLineCanvas" class="stage-line-canvas"></canvas>
+            </div>
+            <div id="stageTaskMatrix" class="stage-task-matrix"></div>
+          </article>
+          <article class="stage-card stage-pulse-card">
+            <h3>Throughput Pulse</h3>
+            <div class="stage-wave-wrap">
+              <canvas id="stageWaveCanvas" class="stage-wave-canvas"></canvas>
+            </div>
+            <div id="stagePulse" class="stage-pulse"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="cockpit-layout">
+        <article class="panel office-panel">
+          <div class="panel-head">
+            <h2>办公室数字孪生监控</h2>
+            <div class="office-head-tools">
+              <p class="muted">Top Floor 200㎡ · 3D WebGL Layer</p>
+              <label class="sim-switch">
+                <input id="simToggle" type="checkbox" checked />
+                <span>模拟动画</span>
+              </label>
+              <label class="sim-switch">
+                <input id="cruiseToggle" type="checkbox" checked />
+                <span>摄像机巡航</span>
+              </label>
+              <button id="cameraResetBtn" class="neon-btn ghost-btn">重置视角</button>
+            </div>
+          </div>
+          <div class="office-grid">
+            <div class="office-map-wrap">
+              <div class="office-viewport" id="officeViewport">
+                <div class="office-loading">3D 场景加载中...</div>
+              </div>
+              <div class="office-legend">
+                <span><i class="legend-dot state-running"></i>RUNNING</span>
+                <span><i class="legend-dot state-active"></i>ACTIVE</span>
+                <span><i class="legend-dot state-idle"></i>IDLE</span>
+                <span><i class="legend-dot state-offline"></i>OFFLINE</span>
+              </div>
+              <p id="office3dStatus" class="muted office-status">等待 3D 引擎初始化...</p>
+            </div>
+            <div class="office-feed-wrap">
+              <h3>办公室播报</h3>
+              <div id="officeFeed" class="office-feed"></div>
+            </div>
+          </div>
+        </article>
+
+        <aside class="cockpit-stack">
+          <article class="panel metrics-panel">
+            <div class="panel-head">
+              <h2>系统截面</h2>
+              <p class="muted">运行快照与负载热区</p>
+            </div>
+            <section class="metric-grid" id="metricGrid"></section>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <h2>Agent 实时状态</h2>
+              <p class="muted">正在做什么 + 运行热度</p>
+            </div>
+            <div id="agentGrid" class="agent-grid"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <h2>实时活动流</h2>
+              <p class="muted">最近会话和执行轨迹</p>
+            </div>
+            <div id="activityList" class="activity-list"></div>
+          </article>
+        </aside>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Cron 雷达</h2>
+          <p class="muted">任务排程与交付状态</p>
+        </div>
+        <div id="cronTable" class="cron-table"></div>
+      </section>
+
+      <footer class="panel footer-bar">
+        <p id="statusLine">系统就绪，等待数据接入。</p>
+      </footer>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

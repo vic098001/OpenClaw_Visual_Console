@@ -1,0 +1,13 @@
+{
+  "name": "openclaw-agents-control-center",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cyber penthouse control center for OpenClaw agents",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "three": "^0.183.2"
+  }
+}

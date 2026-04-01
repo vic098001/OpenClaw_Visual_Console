@@ -63,7 +63,7 @@ npm run dev
 ```
 
 脚本行为：
-- 自动建立 SSH 隧道：`127.0.0.1:74173 -> 远端 127.0.0.1:4173`
+- 自动建立 SSH 隧道：`127.0.0.1:14173 -> 远端 127.0.0.1:4173`
 - 交互式提示输入被监控机 token（`OFFICE_REMOTE_TOKEN`，不回显）
 - 自动配置远端 source 并启动本地聚合看板
 - SSH 隧道断线自动重连（守护循环）
@@ -72,7 +72,7 @@ npm run dev
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
-| `LOCAL_TUNNEL_PORT` | `74173` | 本地隧道端口 |
+| `LOCAL_TUNNEL_PORT` | `14173` | 本地隧道端口 |
 | `REMOTE_DASH_PORT` | `4173` | 远端看板端口 |
 | `SOURCE_ID` | `office` | 监控源 ID |
 | `SOURCE_LABEL` | `Office Mac` | 监控源显示名 |
@@ -98,7 +98,7 @@ export OPENCLAW_REMOTE_SOURCES='[
   {
     "id": "office",
     "label": "Office Mac",
-    "url": "http://127.0.0.1:74173/api/telemetry",
+    "url": "http://127.0.0.1:14173/api/telemetry",
     "tokenEnv": "OFFICE_REMOTE_TOKEN",
     "timeoutMs": 12000
   }

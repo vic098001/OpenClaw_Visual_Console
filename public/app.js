@@ -203,8 +203,9 @@ function apiUrl(pathname, params = {}) {
 async function fetchApi(pathname, { params = {}, allowPrompt = true } = {}) {
   const requestUrl = apiUrl(pathname, params);
   let prompted = false;
+  const maxRetries = 2;
 
-  while (true) {
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
     const headers = {};
     if (authToken) {
       headers.Authorization = `Bearer ${authToken}`;
@@ -233,6 +234,8 @@ async function fetchApi(pathname, { params = {}, allowPrompt = true } = {}) {
     authToken = nextToken;
     storeToken(authToken);
   }
+
+  throw new Error("认证重试次数已耗尽");
 }
 
 function renderSourcePicker() {

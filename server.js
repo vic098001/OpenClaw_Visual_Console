@@ -2,6 +2,7 @@ const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const zlib = require("node:zlib");
 const { execFile } = require("node:child_process");
 
 const PORT = Number(process.env.PORT || 4173);
@@ -12,6 +13,31 @@ const REMOTE_FETCH_TIMEOUT_MS = Number(process.env.REMOTE_FETCH_TIMEOUT_MS || 15
 const DASH_TOKEN = String(process.env.OPENCLAW_DASH_TOKEN || "").trim();
 const INCLUDE_LOCAL_SOURCE = process.env.OPENCLAW_INCLUDE_LOCAL_SOURCE !== "0";
 const DEFAULT_SOURCE_ID = String(process.env.OPENCLAW_DEFAULT_SOURCE || "local").trim();
+const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 120000);
+
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = Number(process.env.RATE_LIMIT_MAX || 60);
+const rateBuckets = new Map();
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  let bucket = rateBuckets.get(ip);
+  if (!bucket || now - bucket.windowStart > RATE_LIMIT_WINDOW_MS) {
+    bucket = { windowStart: now, count: 0 };
+    rateBuckets.set(ip, bucket);
+  }
+  bucket.count += 1;
+  return bucket.count <= RATE_LIMIT_MAX_REQUESTS;
+}
+
+setInterval(() => {
+  const cutoff = Date.now() - RATE_LIMIT_WINDOW_MS * 2;
+  for (const [ip, bucket] of rateBuckets.entries()) {
+    if (bucket.windowStart < cutoff) {
+      rateBuckets.delete(ip);
+    }
+  }
+}, RATE_LIMIT_WINDOW_MS);
 
 const CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -39,10 +65,13 @@ function setSecurityHeaders(res, { isHtml = false } = {}) {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=(), usb=()");
   res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res.setHeader("X-DNS-Prefetch-Control", "off");
   if (isHtml) {
     res.setHeader("Content-Security-Policy", CSP_HTML);
+    res.setHeader("X-Permitted-Cross-Domain-Policies", "none");
   }
 }
 
@@ -135,6 +164,15 @@ function formatError(error) {
     return error;
   }
   return error.message || String(error);
+}
+
+function sanitizeErrorForClient(message) {
+  const raw = String(message || "Unknown error");
+  const cleaned = raw
+    .replace(/\/[^\s:]+\//g, "<path>/")
+    .replace(/at\s+\S+\s+\([^)]+\)/g, "")
+    .trim();
+  return cleaned.slice(0, 200) || "Internal error";
 }
 
 const TELEMETRY_SOURCES = buildSources();
@@ -694,20 +732,24 @@ async function buildTelemetryForSource(source) {
   });
 }
 
-function sendJson(res, statusCode, payload) {
+function sendJson(req, res, statusCode, payload) {
   setSecurityHeaders(res);
-  res.writeHead(statusCode, {
+  const body = JSON.stringify(payload);
+  const headers = {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store"
-  });
-  res.end(JSON.stringify(payload, null, 2));
+  };
+  compressAndSend(req, res, statusCode, headers, body);
 }
 
 function resolveStaticPath(requestPath) {
+  if (requestPath.includes("\0")) {
+    return null;
+  }
   const safePath = requestPath === "/" ? "/index.html" : requestPath;
   const normalizedPath = path.normalize(safePath).replace(/^(\.\.[/\\])+/, "");
   const absolutePath = path.join(PUBLIC_DIR, normalizedPath);
-  if (!absolutePath.startsWith(PUBLIC_DIR)) {
+  if (!absolutePath.startsWith(PUBLIC_DIR + path.sep) && absolutePath !== PUBLIC_DIR) {
     return null;
   }
   return absolutePath;
@@ -739,25 +781,71 @@ function serveStatic(req, res) {
     }
 
     const ext = path.extname(filePath).toLowerCase();
-    setSecurityHeaders(res, { isHtml: ext === ".html" });
-    res.writeHead(200, {
+    const isHtml = ext === ".html";
+    setSecurityHeaders(res, { isHtml });
+    const headers = {
       "Content-Type": CONTENT_TYPES[ext] || "application/octet-stream",
-      "Cache-Control": ext === ".html" ? "no-store" : "public, max-age=300"
-    });
-    res.end(content);
+      "Cache-Control": isHtml ? "no-store" : "public, max-age=300"
+    };
+    const compressible = [".html", ".css", ".js", ".json", ".svg"];
+    if (compressible.includes(ext)) {
+      compressAndSend(req, res, 200, headers, content);
+    } else {
+      res.writeHead(200, headers);
+      res.end(content);
+    }
   });
 }
 
+function compressAndSend(req, res, statusCode, headers, body) {
+  const acceptEncoding = String(req.headers["accept-encoding"] || "");
+  if (typeof body === "string" || Buffer.isBuffer(body)) {
+    const raw = typeof body === "string" ? Buffer.from(body, "utf-8") : body;
+    if (raw.length > 860 && acceptEncoding.includes("gzip")) {
+      zlib.gzip(raw, (err, compressed) => {
+        if (err || !compressed) {
+          res.writeHead(statusCode, headers);
+          res.end(raw);
+          return;
+        }
+        headers["Content-Encoding"] = "gzip";
+        headers["Vary"] = "Accept-Encoding";
+        res.writeHead(statusCode, headers);
+        res.end(compressed);
+      });
+      return;
+    }
+  }
+  res.writeHead(statusCode, headers);
+  res.end(body);
+}
+
 const server = http.createServer(async (req, res) => {
+  const clientIp = req.socket.remoteAddress || "unknown";
+  if (!checkRateLimit(clientIp)) {
+    setSecurityHeaders(res);
+    res.writeHead(429, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Retry-After": "60"
+    });
+    res.end(JSON.stringify({ ok: false, error: "Too many requests" }));
+    return;
+  }
+
   const requestUrl = new URL(req.url, `http://${req.headers.host || `${HOST}:${PORT}`}`);
   const pathname = requestUrl.pathname;
 
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    setSecurityHeaders(res);
+    res.writeHead(405, { "Content-Type": "text/plain; charset=utf-8", Allow: "GET, HEAD" });
+    res.end("Method Not Allowed");
+    return;
+  }
+
   if (pathname === "/api/health") {
-    sendJson(res, 200, {
+    sendJson(req, res, 200, {
       ok: true,
-      time: Date.now(),
-      authEnabled: Boolean(DASH_TOKEN),
-      defaultSourceId: RESOLVED_DEFAULT_SOURCE_ID
+      time: Date.now()
     });
     return;
   }
@@ -768,7 +856,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    sendJson(res, 200, {
+    sendJson(req, res, 200, {
       defaultSourceId: RESOLVED_DEFAULT_SOURCE_ID,
       sources: TELEMETRY_SOURCES.map((source) => ({
         id: source.id,
@@ -789,7 +877,7 @@ const server = http.createServer(async (req, res) => {
     const requestedSourceId = String(requestUrl.searchParams.get("source") || RESOLVED_DEFAULT_SOURCE_ID).trim();
     const source = SOURCE_BY_ID.get(requestedSourceId);
     if (!source) {
-      sendJson(res, 404, {
+      sendJson(req, res, 404, {
         ok: false,
         error: `Unknown source '${requestedSourceId}'`,
         availableSources: TELEMETRY_SOURCES.map((item) => item.id)
@@ -799,12 +887,13 @@ const server = http.createServer(async (req, res) => {
 
     try {
       const telemetry = await buildTelemetryForSource(source);
-      sendJson(res, 200, telemetry);
+      sendJson(req, res, 200, telemetry);
     } catch (error) {
-      sendJson(res, 500, {
+      const safeMessage = sanitizeErrorForClient(formatError(error));
+      sendJson(req, res, 500, {
         ok: false,
         sourceId: source.id,
-        error: formatError(error),
+        error: safeMessage,
         time: Date.now()
       });
     }
@@ -839,6 +928,10 @@ async function main() {
     }
     return;
   }
+
+  server.timeout = REQUEST_TIMEOUT_MS;
+  server.headersTimeout = REQUEST_TIMEOUT_MS + 5000;
+  server.keepAliveTimeout = 65000;
 
   server.on("error", (error) => {
     process.stderr.write(`Server failed to start: ${formatError(error)}\n`);

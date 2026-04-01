@@ -46,7 +46,9 @@ export OPENCLAW_INCLUDE_LOCAL_SOURCE="${OPENCLAW_INCLUDE_LOCAL_SOURCE:-0}"
 export OPENCLAW_DEFAULT_SOURCE="${OPENCLAW_DEFAULT_SOURCE:-$SOURCE_ID}"
 export REMOTE_FETCH_TIMEOUT_MS="${REMOTE_FETCH_TIMEOUT_MS:-15000}"
 export OFFICE_REMOTE_TOKEN
-export OPENCLAW_REMOTE_SOURCES="[{\"id\":\"${SOURCE_ID}\",\"label\":\"${SOURCE_LABEL}\",\"url\":\"http://127.0.0.1:${LOCAL_TUNNEL_PORT}/api/telemetry\",\"tokenEnv\":\"OFFICE_REMOTE_TOKEN\",\"timeoutMs\":12000}]"
+SAFE_SOURCE_ID="$(printf '%s' "$SOURCE_ID" | tr -cd 'a-zA-Z0-9_-')"
+SAFE_SOURCE_LABEL="$(printf '%s' "$SOURCE_LABEL" | sed 's/[\\"]//g' | cut -c1-64)"
+export OPENCLAW_REMOTE_SOURCES="[{\"id\":\"${SAFE_SOURCE_ID}\",\"label\":\"${SAFE_SOURCE_LABEL}\",\"url\":\"http://127.0.0.1:${LOCAL_TUNNEL_PORT}/api/telemetry\",\"tokenEnv\":\"OFFICE_REMOTE_TOKEN\",\"timeoutMs\":12000}]"
 
 # 常用机本地看板默认不再额外启用前端 token，避免重复输入。
 # 如果你仍需要常用机看板鉴权，可预先 export VIEWER_DASH_TOKEN=...

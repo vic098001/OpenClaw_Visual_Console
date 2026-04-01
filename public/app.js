@@ -15,6 +15,8 @@ const OFFICE_ZONES = {
   offline: { x: 94, y: 92 }
 };
 
+const THEME_STORAGE_KEY = "openclaw_dashboard_theme";
+
 const elements = {
   refreshBtn: document.querySelector("#refreshBtn"),
   lastUpdated: document.querySelector("#lastUpdated"),
@@ -48,8 +50,54 @@ const elements = {
   stageTaskMatrix: document.querySelector("#stageTaskMatrix"),
   stagePulse: document.querySelector("#stagePulse"),
   stageLineCanvas: document.querySelector("#stageLineCanvas"),
-  stageWaveCanvas: document.querySelector("#stageWaveCanvas")
+  stageWaveCanvas: document.querySelector("#stageWaveCanvas"),
+  themeToggle: document.querySelector("#themeToggle")
 };
+
+function getStoredTheme() {
+  try {
+    return localStorage.getItem(THEME_STORAGE_KEY) || "";
+  } catch { return ""; }
+}
+
+function storeTheme(theme) {
+  try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch {}
+}
+
+function isNightTheme() {
+  return document.documentElement.getAttribute("data-theme") === "night";
+}
+
+function isDayTheme() {
+  return !isNightTheme();
+}
+
+function applyTheme(theme) {
+  if (theme === "night") {
+    document.documentElement.setAttribute("data-theme", "night");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+  }
+  updateThemeToggleUI();
+}
+
+function updateThemeToggleUI() {
+  if (!elements.themeToggle) return;
+  elements.themeToggle.innerHTML = isNightTheme()
+    ? '<span class="theme-icon">🌙</span> 夜间'
+    : '<span class="theme-icon">☀️</span> 白天';
+}
+
+function toggleTheme() {
+  const next = isNightTheme() ? "day" : "night";
+  applyTheme(next);
+  storeTheme(next);
+}
+
+(function initTheme() {
+  const stored = getStoredTheme();
+  applyTheme(stored || "day");
+})();
 
 const simulation = {
   enabled: true,
@@ -1014,26 +1062,39 @@ function setStageFxMetrics(data, alertItems = []) {
   stageFx.metrics.health = next.health;
 }
 
+function getCanvasColors() {
+  const s = getComputedStyle(document.documentElement);
+  const read = (prop) => s.getPropertyValue(prop).trim();
+  return {
+    bg: read("--cv-bg") || "#FFFFFF",
+    grid: read("--cv-grid") || "#EAEAE8",
+    lineA: read("--cv-line-a") || "#111110",
+    lineB: read("--cv-line-b") || "#8A8A87",
+    lineC: read("--cv-line-c") || "#D4D4D0",
+    fillTop: read("--cv-fill-top") || "rgba(17, 17, 16, 0.05)",
+    fillBottom: read("--cv-fill-bot") || "rgba(17, 17, 16, 0.00)",
+    mid: read("--cv-grid") || "#EAEAE8"
+  };
+}
+
 function drawStageLineCanvas(now) {
   const { ctx, width, height } = resizeCanvas(elements.stageLineCanvas);
   if (!ctx || width <= 0 || height <= 0) {
     return;
   }
 
+  const colors = getCanvasColors();
   const inset = 8;
   const drawWidth = Math.max(1, width - inset * 2);
   const drawHeight = Math.max(1, height - inset * 2);
   const samples = stageFx.lineSamples;
   const stepX = drawWidth / Math.max(1, samples.length - 1);
 
-  const bg = ctx.createLinearGradient(0, 0, 0, height);
-  bg.addColorStop(0, "rgba(9, 24, 45, 0.92)");
-  bg.addColorStop(1, "rgba(4, 9, 18, 0.96)");
   ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = bg;
+  ctx.fillStyle = colors.bg;
   ctx.fillRect(0, 0, width, height);
 
-  ctx.strokeStyle = "rgba(93, 228, 255, 0.12)";
+  ctx.strokeStyle = colors.grid;
   ctx.lineWidth = 1;
   for (let row = 1; row <= 4; row += 1) {
     const y = inset + (drawHeight / 5) * row;
@@ -1057,8 +1118,8 @@ function drawStageLineCanvas(now) {
   ctx.lineTo(inset, height - inset);
   ctx.closePath();
   const fill = ctx.createLinearGradient(0, inset, 0, height - inset);
-  fill.addColorStop(0, "rgba(93, 228, 255, 0.34)");
-  fill.addColorStop(1, "rgba(93, 228, 255, 0.02)");
+  fill.addColorStop(0, colors.fillTop);
+  fill.addColorStop(1, colors.fillBottom);
   ctx.fillStyle = fill;
   ctx.fill();
 
@@ -1072,24 +1133,9 @@ function drawStageLineCanvas(now) {
       ctx.lineTo(x, y);
     }
   }
-  const stroke = ctx.createLinearGradient(inset, 0, width - inset, 0);
-  stroke.addColorStop(0, "rgba(124, 168, 255, 0.55)");
-  stroke.addColorStop(0.58, "rgba(93, 228, 255, 0.96)");
-  stroke.addColorStop(1, "rgba(255, 194, 109, 0.9)");
-  ctx.strokeStyle = stroke;
-  ctx.lineWidth = 2.2;
-  ctx.shadowColor = "rgba(93, 228, 255, 0.42)";
-  ctx.shadowBlur = 10;
+  ctx.strokeStyle = colors.lineA;
+  ctx.lineWidth = 1.8;
   ctx.stroke();
-  ctx.shadowBlur = 0;
-
-  const scanX = inset + (((now * 0.095) % drawWidth + drawWidth) % drawWidth);
-  const scan = ctx.createLinearGradient(scanX - 40, 0, scanX + 40, 0);
-  scan.addColorStop(0, "rgba(93, 228, 255, 0)");
-  scan.addColorStop(0.5, "rgba(93, 228, 255, 0.28)");
-  scan.addColorStop(1, "rgba(93, 228, 255, 0)");
-  ctx.fillStyle = scan;
-  ctx.fillRect(scanX - 40, inset, 80, drawHeight);
 }
 
 function drawStageWaveCanvas(now) {
@@ -1098,19 +1144,17 @@ function drawStageWaveCanvas(now) {
     return;
   }
 
+  const colors = getCanvasColors();
   const midY = height * 0.5;
   const amplitudeA = 14 + (stageFx.metrics.run / 100) * 22;
   const amplitudeB = 9 + (stageFx.metrics.live / 100) * 18;
   const amplitudeC = 6 + ((100 - stageFx.metrics.health) / 100) * 16;
 
-  const bg = ctx.createLinearGradient(0, 0, 0, height);
-  bg.addColorStop(0, "rgba(8, 20, 37, 0.94)");
-  bg.addColorStop(1, "rgba(3, 8, 16, 0.96)");
   ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = bg;
+  ctx.fillStyle = colors.bg;
   ctx.fillRect(0, 0, width, height);
 
-  ctx.strokeStyle = "rgba(93, 228, 255, 0.2)";
+  ctx.strokeStyle = colors.mid;
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(0, midY);
@@ -1134,9 +1178,9 @@ function drawStageWaveCanvas(now) {
     ctx.stroke();
   };
 
-  drawWave(amplitudeA, 0.028, 0.0046, "rgba(93, 228, 255, 0.96)", 2.1);
-  drawWave(amplitudeB, 0.036, 0.0061, "rgba(124, 168, 255, 0.78)", 1.6, Math.PI * 0.4);
-  drawWave(amplitudeC, 0.044, 0.0082, "rgba(255, 109, 137, 0.52)", 1.2, Math.PI * 0.8);
+  drawWave(amplitudeA, 0.028, 0.0046, colors.lineA, 1.8);
+  drawWave(amplitudeB, 0.036, 0.0061, colors.lineB, 1.4, Math.PI * 0.4);
+  drawWave(amplitudeC, 0.044, 0.0082, colors.lineC, 1.0, Math.PI * 0.8);
 }
 
 function animateStageFx(now) {
@@ -1933,6 +1977,11 @@ elements.actionSnapshot?.addEventListener("click", () => {
   copySnapshot().catch(() => {
     setActionDeckFeedback("快照复制失败", "error");
   });
+});
+
+elements.themeToggle?.addEventListener("click", () => {
+  toggleTheme();
+  addOfficeEvent("主题切换", isDayTheme() ? "已切换到白天模式" : "已切换到夜间模式");
 });
 
 elements.collabNetwork?.addEventListener("click", (event) => {

@@ -602,9 +602,14 @@ function buildAlertItems({ meta = {}, gateway = {}, agents = [], summary = {} } 
 }
 
 function renderCommandRibbon(summary, alertItems = []) {
-  elements.agentHeat.textContent = `${summary.activeAgents}/${summary.totalAgents}`;
-  const alerts = alertItems.filter((item) => item.level !== "ok").length;
-  elements.alertCount.textContent = String(alerts);
+  if (!summary) return;
+  if (elements.agentHeat) {
+    elements.agentHeat.textContent = `${summary.activeAgents || 0}/${summary.totalAgents || 0}`;
+  }
+  if (elements.alertCount) {
+    const alerts = alertItems.filter((item) => item.level !== "ok").length;
+    elements.alertCount.textContent = String(alerts);
+  }
 }
 
 function buildMissionTimelineItems(data) {
